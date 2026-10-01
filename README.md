@@ -6,6 +6,7 @@ A polished Next.js app that searches Spotify for an artist and displays their al
 - Search by artist name
 - Fetch artist and album data from the Spotify API
 - Show album covers, release dates, and track counts
+- Select an album to browse its songs
 - Open each album or artist directly in Spotify
 - Production-friendly Next.js app structure for deployment on Vercel or other Node hosts
 
@@ -27,6 +28,8 @@ This app is ready to deploy on Vercel. Add the same environment variables in you
 ## Project structure
 - app/page.js: Search UI
 - app/api/albums/route.js: Spotify API route
+- app/api/albums/[albumId]/tracks/route.js: Spotify album tracks route
+- lib/spotify.js: Shared Spotify authentication helper
 - app/layout.js: App shell
 - app/globals.css: Styling
 - next.config.mjs: Deployment-friendly Next.js config

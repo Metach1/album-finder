@@ -215,6 +215,23 @@ h1 {
   border-color: rgba(29, 185, 84, 0.35);
 }
 
+.album-select {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.album-select:focus-visible,
+.dialog-close:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: -3px;
+}
+
 .album-art {
   aspect-ratio: 1;
   background: rgba(255, 255, 255, 0.02);
@@ -235,6 +252,17 @@ h1 {
   padding: 16px 16px 18px;
 }
 
+.album-info .album-action {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--secondary);
+  font-weight: 700;
+}
+
+.album-spotify-link {
+  padding: 0 16px 18px;
+}
+
 .album-info h3 {
   margin: 0 0 10px;
   font-size: 1.1rem;
@@ -244,6 +272,120 @@ h1 {
 .album-info p {
   margin: 0 0 8px;
   color: var(--muted);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.tracks-dialog {
+  position: relative;
+  width: min(100%, 640px);
+  max-height: min(86vh, 800px);
+  overflow-y: auto;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel-strong);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.dialog-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.tracks-heading {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-right: 38px;
+  margin-bottom: 22px;
+}
+
+.tracks-heading img {
+  width: 84px;
+  height: 84px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.tracks-heading h2 {
+  margin: 0 0 6px;
+}
+
+.tracks-heading p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.tracks-message {
+  padding: 18px 0;
+  color: var(--muted);
+}
+
+.tracks-error {
+  color: #ffb4ab;
+}
+
+.track-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.track-list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  padding: 10px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.track-number {
+  width: 24px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.track-copy {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.track-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track-artists {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.track-list a {
+  color: #b5f7c9;
+  text-decoration: none;
+  font-weight: 600;
 }
 
 .sr-only {

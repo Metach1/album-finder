@@ -1,12 +1,54 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function HomePage() {
   const [artist, setArtist] = useState('');
   const [status, setStatus] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [tracks, setTracks] = useState([]);
+  const [tracksLoading, setTracksLoading] = useState(false);
+  const [tracksError, setTracksError] = useState('');
+
+  useEffect(() => {
+    if (!selectedAlbum) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    async function loadTracks() {
+      setTracks([]);
+      setTracksError('');
+      setTracksLoading(true);
+
+      try {
+        const response = await fetch(`/api/albums/${encodeURIComponent(selectedAlbum.id)}/tracks`, {
+          signal: controller.signal
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Unable to fetch album tracks.');
+        }
+
+        setTracks(data.tracks);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setTracksError(error.message || 'Something went wrong while loading tracks.');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setTracksLoading(false);
+        }
+      }
+    }
+
+    loadTracks();
+    return () => controller.abort();
+  }, [selectedAlbum]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -47,8 +89,8 @@ export default function HomePage() {
           <span className="badge">Spotify album explorer</span>
           <h1>Find albums by your favorite artist</h1>
           <p>
-            Search an artist and instantly browse their album catalog, release dates, track counts,
-            and direct Spotify links.
+            Search an artist and browse their albums. Select any album to see its songs and open
+            tracks or albums directly on Spotify.
           </p>
         </div>
 
@@ -95,18 +137,29 @@ export default function HomePage() {
           <div className="album-grid">
             {result.albums.map((album) => (
               <article className="album-card" key={album.id}>
-                <div className="album-art">
-                  {album.image ? (
-                    <img src={album.image} alt={`${album.name} cover`} />
-                  ) : (
-                    <div className="album-placeholder">No cover</div>
-                  )}
-                </div>
+                <button
+                  className="album-select"
+                  type="button"
+                  onClick={() => setSelectedAlbum(album)}
+                  aria-label={`View songs on ${album.name}`}
+                >
+                  <div className="album-art">
+                    {album.image ? (
+                      <img src={album.image} alt={`${album.name} cover`} />
+                    ) : (
+                      <div className="album-placeholder">No cover</div>
+                    )}
+                  </div>
 
-                <div className="album-info">
-                  <h3>{album.name}</h3>
-                  <p>Released: {album.releaseDate || 'Unknown'}</p>
-                  <p>Tracks: {album.totalTracks || 'N/A'}</p>
+                  <div className="album-info">
+                    <h3>{album.name}</h3>
+                    <p>Released: {album.releaseDate || 'Unknown'}</p>
+                    <p>Tracks: {album.totalTracks || 'N/A'}</p>
+                    <span className="album-action">View songs</span>
+                  </div>
+                </button>
+
+                <div className="album-spotify-link">
                   <a href={album.spotifyUrl} target="_blank" rel="noreferrer">
                     Open on Spotify
                   </a>
@@ -115,6 +168,69 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+      ) : null}
+
+      {selectedAlbum ? (
+        <div
+          className="dialog-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setSelectedAlbum(null);
+            }
+          }}
+        >
+          <section
+            className="tracks-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tracks-title"
+          >
+            <button
+              className="dialog-close"
+              type="button"
+              onClick={() => setSelectedAlbum(null)}
+              aria-label="Close album songs"
+            >
+              ×
+            </button>
+
+            <div className="tracks-heading">
+              {selectedAlbum.image ? (
+                <img src={selectedAlbum.image} alt="" />
+              ) : null}
+              <div>
+                <p className="section-label">Album songs</p>
+                <h2 id="tracks-title">{selectedAlbum.name}</h2>
+                <p>{selectedAlbum.artist}</p>
+              </div>
+            </div>
+
+            {tracksLoading ? <p className="tracks-message">Loading songs...</p> : null}
+            {tracksError ? <p className="tracks-message tracks-error">{tracksError}</p> : null}
+            {!tracksLoading && !tracksError && tracks.length === 0 ? (
+              <p className="tracks-message">No songs were found for this album.</p>
+            ) : null}
+
+            {!tracksLoading && tracks.length > 0 ? (
+              <ol className="track-list">
+                {tracks.map((track) => (
+                  <li key={track.id}>
+                    <span className="track-number">{track.trackNumber}</span>
+                    <div className="track-copy">
+                      <span className="track-name">{track.name}</span>
+                      <span className="track-artists">{track.artists.join(', ')}</span>
+                    </div>
+                    {track.spotifyUrl ? (
+                      <a href={track.spotifyUrl} target="_blank" rel="noreferrer">
+                        Spotify
+                      </a>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            ) : null}
+          </section>
+        </div>
       ) : null}
     </main>
   );
